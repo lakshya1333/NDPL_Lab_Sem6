@@ -31,7 +31,7 @@ int main() {
     while (1) {
         printf("Enter string (or Halt to quit): ");
         fgets(buffer, MAXLINE, stdin);
-        buffer[strcspn(buffer, "\n")] = '\0';
+        buffer[strcspn(buffer, "\n")] = '\0'; //This removes the newline character (\n) that fgets() automatically stores when you take input
 
         write(sockfd, buffer, strlen(buffer));
 

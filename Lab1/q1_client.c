@@ -20,9 +20,9 @@ int main() {
     }
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_port = htons(PORT); // Convert port number to network byte order
 
-    // Convert IPv4 address
+    // Convert IPv4 address from string to binary
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         perror("Invalid address");
         return -1;

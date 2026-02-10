@@ -1,8 +1,15 @@
+// Write two separate C programs (one for server and other for client) using socket
+// APIs for TCP, to implement the client-server model such that the client should send
+// a set of integers along with a choice to search for a number or sort the given set
+// in ascending/descending order or split the given set to odd and even to the server.
+// The server performs the relevant operation according to the choice. Client should
+// continue to send the messages until the user enters selects the choice “exit”.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <arpa/inet.h>
+#include <arpa/inet.h> // Socket structures and functions
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
@@ -37,19 +44,17 @@ int main() {
     int server_fd, new_socket;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
-    char buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE]; // Buffer to store client message
 
-    // Create socket
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1) {
         perror("Socket failed");
         exit(EXIT_FAILURE);
     }
 
-    // Bind
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    address.sin_port = htons(PORT); // Convert port to network byte order
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("Bind failed");
         exit(EXIT_FAILURE);
@@ -70,7 +75,7 @@ int main() {
     }
 
     while (1) {
-        memset(buffer, 0, BUFFER_SIZE);
+        memset(buffer, 0, BUFFER_SIZE);  // Clear buffer before reading new message
         read(new_socket, buffer, BUFFER_SIZE);
 
         if (strcmp(buffer, "exit") == 0) {
@@ -81,9 +86,9 @@ int main() {
         // Parse choice and numbers
         char choice[20];
         int arr[100], n = 0, searchNum;
-        sscanf(buffer, "%s", choice);
+        sscanf(buffer, "%s", choice); // Extract the first word (choice)
 
-        char *token = strtok(buffer + strlen(choice), " ");
+        char *token = strtok(buffer + strlen(choice), " "); // Tokenize remaining string into integers
         while (token != NULL) {
             arr[n++] = atoi(token);
             token = strtok(NULL, " ");

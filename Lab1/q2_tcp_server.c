@@ -1,3 +1,11 @@
+// Write two separate C programs (one for server and other for client) using UNIX
+// socket APIs for UDP, in which the client accepts a string from the user and sends it
+// to the server. The server will check if the string is palindrome or not and send the
+// result with the length of the string and the number of occurrences of each vowel in
+// the string to the client. The client displays the received data on the client screen. The
+// process repeats until user enter the string “Halt”. Then both the processes terminate.
+// (The program should make use of TCP and UDP separately).
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
