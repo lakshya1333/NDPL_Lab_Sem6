@@ -68,7 +68,6 @@ int main() {
             printf("\nFinal Output:\n%s\n", final_output);
         }
 
-        // If you MUST use fork per your lab question:
         if (fork() == 0) {
             // In a real concurrent server, the child would do the work here
             close(new_socket);
