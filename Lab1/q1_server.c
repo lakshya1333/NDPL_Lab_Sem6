@@ -90,7 +90,7 @@ int main() {
 
         char *token = strtok(buffer + strlen(choice), " "); // Tokenize remaining string into integers
         while (token != NULL) {
-            arr[n++] = atoi(token);
+            arr[n++] = atoi(token); //converts string to integer
             token = strtok(NULL, " ");
         }
 

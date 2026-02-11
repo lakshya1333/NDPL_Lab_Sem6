@@ -5,63 +5,78 @@
 #include <arpa/inet.h>
 
 #define PORT 8080
-#define MAX_RECORDS 5
+#define BUF_SIZE 1024
 
-struct DNSRecord {
-    char hostname[50];
-    char ip_address[20];
-};
+int main()
+{
+    int server_fd, client_fd;
+    struct sockaddr_in server_addr;
+    socklen_t addrlen = sizeof(server_addr);
 
-struct DNSRecord db[MAX_RECORDS] = {
-    {"google.com", "142.250.190.46"},
-    {"facebook.com", "157.240.3.35"},
-    {"github.com", "140.82.121.4"},
-    {"openai.com", "13.107.246.45"},
-    {"manipal.edu", "115.243.160.50"}
-};
-
-int main() {
-    int server_fd, new_socket;
-    struct sockaddr_in address;
-    int addrlen = sizeof(address);
-    char buffer[1024] = {0};
-    char response[1024];
+    char hostname[BUF_SIZE];
+    char response[BUF_SIZE];
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
 
-    bind(server_fd, (struct sockaddr *)&address, sizeof(address));
-    listen(server_fd, 3);
-    
-    printf("[DNS SERVER] Listening on port %d...\n", PORT);
-
-    while (1) {
-        new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-        
-        memset(buffer, 0, 1024);
-        read(new_socket, buffer, 1024);
-        printf("[QUERY] Received request for: %s\n", buffer);
-
-        int found = 0;
-        for (int i = 0; i < MAX_RECORDS; i++) {
-            if (strcmp(buffer, db[i].hostname) == 0) {
-                sprintf(response, "IP Address: %s", db[i].ip_address);
-                found = 1;
-                break;
-            }
-        }
-
-        if (!found) {
-            strcpy(response, "Error: Hostname not found in database.");
-        }
-
-        send(new_socket, response, strlen(response), 0);
-        printf("[RESPONSE] Sent result to client.\n");
-
-        close(new_socket);
+    if (server_fd < 0)
+    {
+        perror("Socket creation failed");
+        exit(1);
     }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+    listen(server_fd, 5);
+    printf("✅ DNS Server running on port %d...\n", PORT);
+
+    client_fd = accept(server_fd, (struct sockaddr *)&server_addr, &addrlen);
+
+    recv(client_fd, hostname, BUF_SIZE, 0);
+
+    printf("Client requested domain: %s\n", hostname);
+
+    FILE *fp = fopen("database.txt", "r");
+
+    if (!fp)
+    {
+        strcpy(response, "Database file not found!");
+        send(client_fd, response, BUF_SIZE, 0);
+        close(client_fd);
+        close(server_fd);
+        return 0;
+    }
+
+    char domain[BUF_SIZE], ip[BUF_SIZE];
+    int found = 0;
+
+    while (fscanf(fp, "%s %s", domain, ip) != EOF)
+    {
+        if (strcmp(domain, hostname) == 0)
+        {
+            found = 1;
+            break;
+        }
+    }
+
+    fclose(fp);
+
+    if (found)
+    {
+        sprintf(response, "Domain Found!\nIP Address: %s", ip);
+    }
+    else
+    {
+        sprintf(response, "Domain Not Found in DNS Database!");
+    }
+
+    send(client_fd, response, BUF_SIZE, 0);
+
+    close(client_fd);
+    close(server_fd);
+
     return 0;
 }

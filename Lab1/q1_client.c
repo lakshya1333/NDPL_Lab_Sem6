@@ -39,7 +39,7 @@ int main() {
     while (1) {
         printf("\nEnter choice (search/asc/desc/split/exit): ");
         fgets(buffer, BUFFER_SIZE, stdin);
-        buffer[strcspn(buffer, "\n")] = 0;
+        buffer[strcspn(buffer, "\n")] = 0; //It removes the newline character \n that gets stored when you use fgets()
 
         if (strcmp(buffer, "exit") == 0) {
             send(sock, buffer, strlen(buffer), 0);

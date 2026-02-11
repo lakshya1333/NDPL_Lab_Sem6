@@ -5,73 +5,135 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 
-struct Student {
-    char reg_no[20];
+#define PORT 9090
+#define BUF_SIZE 1024
+
+struct Student
+{
+    char regNo[20];
     char name[50];
     char address[100];
+
     char dept[20];
     int semester;
-    char section;
+    char section[5];
     char courses[100];
-    char sub_code[20];
+
+    char subjectCode[10];
     int marks;
 };
 
-struct Request {
-    int choice;
-    char detail[50];
+
+struct Student db[] =
+{
+    {"21CSE101", "Lakshya", "Delhi, India",
+     "CSE", 4, "A", "CN, OS, DBMS",
+     "CS301", 87},
+
+    {"21CSE102", "Shinchan", "Tokyo, Japan",
+     "CSE", 3, "B", "DSA, OOP, COA",
+     "CS302", 91}
 };
 
-struct Student db[] = {
-    {"101", "Alice", "123 Maple St", "CSE", 4, 'A', "OS, CN, DBMS", "CS301", 85},
-    {"102", "Bob", "456 Oak Ave", "ECE", 6, 'B', "VLSI, DSP", "EC402", 78}
-};
-
-int main() {
-    int sock;
+int main()
+{
+    int sockfd;
     struct sockaddr_in server_addr, client_addr;
-    socklen_t addr_len = sizeof(client_addr);
-    struct Request req;
-    char result[1024];
+    socklen_t len = sizeof(client_addr);
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    
+    int option;
+    char input[BUF_SIZE], output[BUF_SIZE];
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
     server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(8081);
 
-    bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    printf("UDP Server listening on port 8081...\n");
+    bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-    while (1) {
-        if (recvfrom(sock, &req, sizeof(req), 0, (struct sockaddr*)&client_addr, &addr_len) > 0) {
-            
-            if (fork() == 0) { 
-                int found = 0;
-                memset(result, 0, sizeof(result));
+    printf("✅ UDP Student Server running on port %d...\n", PORT);
 
-                for (int i = 0; i < 2; i++) {
-                    if ((req.choice == 1 && strcmp(db[i].reg_no, req.detail) == 0) ||
-                        (req.choice == 2 && strcmp(db[i].name, req.detail) == 0) ||
-                        (req.choice == 3 && strcmp(db[i].sub_code, req.detail) == 0)) {
-                        
-                        found = 1;
-                        if (req.choice == 1)
-                            sprintf(result, "PID: %d | Name: %s, Addr: %s", getpid(), db[i].name, db[i].address);
-                        else if (req.choice == 2)
-                            sprintf(result, "PID: %d | Dept: %s, Sem: %d, Sec: %c", getpid(), db[i].dept, db[i].semester, db[i].section);
-                        else if (req.choice == 3)
-                            sprintf(result, "PID: %d | Marks: %d", getpid(), db[i].marks);
+    while (1)
+    {
+        recvfrom(sockfd, &option, sizeof(option), 0,
+                 (struct sockaddr *)&client_addr, &len);
+
+        if (option == 4)
+        {
+            printf("Client exited.\n");
+            break;
+        }
+
+        memset(input, 0, BUF_SIZE);
+        recvfrom(sockfd, input, BUF_SIZE, 0,
+                 (struct sockaddr *)&client_addr, &len);
+
+        pid_t pid = fork();
+
+        if (pid == 0)
+        {
+
+            memset(output, 0, BUF_SIZE);
+
+            if (option == 1)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    if (strcmp(db[i].regNo, input) == 0)
+                    {
+                        sprintf(output,
+                                "Child-1 PID=%d\nRegNo=%s\nName=%s\nAddress=%s\n",
+                                getpid(), db[i].regNo,
+                                db[i].name, db[i].address);
                         break;
                     }
                 }
-                if (!found) sprintf(result, "PID: %d | Not Found.", getpid());
-
-                sendto(sock, result, strlen(result), 0, (struct sockaddr*)&client_addr, addr_len);
-                exit(0);
             }
-            waitpid(-1, NULL, WNOHANG);
+
+            else if (option == 2)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    if (strcmp(db[i].name, input) == 0)
+                    {
+                        sprintf(output,
+                                "Child-2 PID=%d\nName=%s\nDept=%s\nSemester=%d\nSection=%s\nCourses=%s\n",
+                                getpid(), db[i].name,
+                                db[i].dept, db[i].semester,
+                                db[i].section, db[i].courses);
+                        break;
+                    }
+                }
+            }
+
+            else if (option == 3)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    if (strcmp(db[i].subjectCode, input) == 0)
+                    {
+                        sprintf(output,
+                                "Child-3 PID=%d\nSubject=%s\nMarks=%d\n",
+                                getpid(), db[i].subjectCode,
+                                db[i].marks);
+                        break;
+                    }
+                }
+            }
+
+            if (strlen(output) == 0)
+                sprintf(output, "PID=%d\nRecord Not Found!\n", getpid());
+
+            sendto(sockfd, output, BUF_SIZE, 0,
+                   (struct sockaddr *)&client_addr, len);
+
+            exit(0);
         }
+
+        /* ---- Parent waits ---- */
+        wait(NULL);
     }
+
     return 0;
 }

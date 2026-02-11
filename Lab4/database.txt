@@ -1,0 +1,4 @@
+google.com 142.250.190.14
+openai.com 104.18.12.123
+iitd.ac.in 103.27.9.24
+github.com 140.82.121.4

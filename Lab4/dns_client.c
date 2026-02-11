@@ -5,39 +5,41 @@
 #include <arpa/inet.h>
 
 #define PORT 8080
+#define BUF_SIZE 1024
 
-int main() {
-    int sock = 0;
-    struct sockaddr_in serv_addr;
-    char hostname[1024];
-    char buffer[1024] = {0};
+int main()
+{
+    int sock;
+    struct sockaddr_in server_addr;
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
-        return -1;
+    char hostname[BUF_SIZE];
+    char buffer[BUF_SIZE];
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (sock < 0)
+    {
+        perror("Socket creation failed");
+        exit(1);
     }
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
 
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
-        printf("\nInvalid address/ Address not supported \n");
-        return -1;
-    }
+    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
 
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection Failed \n");
-        return -1;
-    }
+    connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-    printf("Enter Hostname to Resolve (e.g., google.com): ");
+    printf("Enter hostname to resolve: ");
     scanf("%s", hostname);
 
-    send(sock, hostname, strlen(hostname), 0);
-    read(sock, buffer, 1024);
+    send(sock, hostname, BUF_SIZE, 0);
 
-    printf("\n[DNS RESPONSE]: %s\n", buffer);
+    recv(sock, buffer, BUF_SIZE, 0);
+
+    printf("\n--- DNS Response ---\n%s\n", buffer);
 
     close(sock);
+
     return 0;
 }

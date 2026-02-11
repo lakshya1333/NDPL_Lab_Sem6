@@ -1,43 +1,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <arpa/inet.h>
 
-struct Request {
-    int choice;
-    char detail[50];
-};
+#define PORT 9090
+#define BUF_SIZE 1024
 
-int main() {
-    int sock;
+int main()
+{
+    int sockfd;
     struct sockaddr_in server_addr;
-    struct Request req;
-    char buffer[2048];
-    socklen_t addr_len = sizeof(server_addr);
+    socklen_t len = sizeof(server_addr);
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    
+    int option;
+    char input[BUF_SIZE], buffer[BUF_SIZE];
+
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(8081);
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_port = htons(PORT);
+    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
 
-    printf("--- Student Info (UDP) ---\n");
-    printf("1. Reg No\n2. Name\n3. Subject Code\nChoice: ");
-    scanf("%d", &req.choice);
-    getchar();
+    while (1)
+    {
+        printf("\n====== STUDENT DATABASE MENU ======\n");
+        printf("1. Registration Number\n");
+        printf("2. Student Name\n");
+        printf("3. Subject Code\n");
+        printf("4. Exit\n");
+        printf("Enter option: ");
+        scanf("%d", &option);
 
-    printf("Enter data: ");
-    fgets(req.detail, 50, stdin);
-    req.detail[strcspn(req.detail, "\n")] = 0;
+        sendto(sockfd, &option, sizeof(option), 0,
+               (struct sockaddr *)&server_addr, len);
 
-    sendto(sock, &req, sizeof(req), 0, (struct sockaddr*)&server_addr, addr_len);
+        if (option == 4)
+            break;
 
-    memset(buffer, 0, sizeof(buffer));
-    recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&server_addr, &addr_len);
-    
-    printf("\n[UDP Server Response]:\n%s\n", buffer);
+        printf("Enter value: ");
+        scanf("%s", input);
 
-    close(sock);
+        sendto(sockfd, input, BUF_SIZE, 0,
+               (struct sockaddr *)&server_addr, len);
+
+        memset(buffer, 0, BUF_SIZE);
+
+        recvfrom(sockfd, buffer, BUF_SIZE, 0,
+                 (struct sockaddr *)&server_addr, &len);
+
+        printf("\n--- Server Response ---\n%s\n", buffer);
+    }
+
     return 0;
 }
