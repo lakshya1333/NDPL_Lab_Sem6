@@ -2,68 +2,86 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #define PORT 8080
-#define MAXBUF 1024
+#define BUF_SIZE 1024
 
-int main() {
-    int sockfd;
-    struct sockaddr_in serv_addr;
-    char buffer[MAXBUF];
-    pid_t pid;
+int main()
+{
+    int sock;
+    struct sockaddr_in server_addr;
+    char buffer[BUF_SIZE];
 
-    // Create socket
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        perror("Error opening socket");
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0)
+    {
+        perror("Socket creation failed");
         exit(1);
     }
 
-    // Server address
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
 
-    // Connect to server
-    if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        perror("Connection failed");
+    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
+
+    connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+    printf("✅ Connected to server!\n");
+
+    printf("\n[CLIENT PARENT] PID = %d, PPID = %d\n", getpid(), getppid());
+
+    pid_t pid = fork();
+
+    if (pid < 0)
+    {
+        perror("Fork failed");
         exit(1);
     }
 
-    printf("Connected to server.\n");
+    if (pid == 0)
+    {
+        printf("[CLIENT CHILD] PID = %d, PPID = %d\n\n", getpid(), getppid());
 
-    // Fork for full-duplex
-    pid = fork();
-    if (pid < 0) {
-        perror("Error on fork");
-        exit(1);
-    }
+        while (1)
+        {
+            memset(buffer, 0, BUF_SIZE);
 
-    if (pid == 0) {
-        // Child process: send messages
-        printf("Child Process (PID=%d, PPID=%d)\n", getpid(), getppid());
-        while (1) {
-            memset(buffer, 0, MAXBUF);
-            fgets(buffer, MAXBUF, stdin);
-            write(sockfd, buffer, strlen(buffer));
+            recv(sock, buffer, BUF_SIZE, 0);
+
+            if (strcmp(buffer, "exit") == 0)
+            {
+                printf("Server exited. Closing chat...\n");
+                exit(0);
+            }
+
+            printf("Server: %s\n", buffer);
         }
-    } else {
-        // Parent process: receive messages
-        printf("Parent Process (PID=%d, PPID=%d)\n", getpid(), getppid());
-        while (1) {
-            memset(buffer, 0, MAXBUF);
-            int n = read(sockfd, buffer, MAXBUF);
-            if (n > 0) {
-                printf("Server: %s", buffer);
+    }
+
+    else
+    {
+        while (1)
+        {
+            memset(buffer, 0, BUF_SIZE);
+
+            printf("Client: ");
+            fgets(buffer, BUF_SIZE, stdin);
+
+            // Remove newline
+            buffer[strcspn(buffer, "\n")] = '\0';
+
+            send(sock, buffer, strlen(buffer), 0);
+
+            if (strcmp(buffer, "exit") == 0)
+            {
+                printf("Client exiting...\n");
+                break;
             }
         }
     }
 
-    close(sockfd);
+    close(sock);
+
     return 0;
 }
