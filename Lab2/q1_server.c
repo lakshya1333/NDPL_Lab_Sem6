@@ -38,7 +38,7 @@ int replace_string(const char *filename, const char *str1, const char *str2) {
 
     while (fgets(line, sizeof(line), fp)) {
         char *pos;
-        while ((pos = strstr(line, str1)) != NULL) {
+        while ((pos = strstr(line, str1)) != NULL) { //Finds substring inside a line.
             // Replace occurrence
             char newLine[BUF_SIZE];
             int lenBefore = pos - line;
