@@ -95,6 +95,27 @@ ntp server 1.0.0.2
 
 
 
+DHCP =>
+🟢 R2 (DHCP for Left LAN)
+ip dhcp excluded-address 192.168.10.1
+
+ip dhcp pool LAN1
+network 192.168.10.0 255.255.255.0
+default-router 192.168.10.1
+dns-server 8.8.8.8
+exit
+🔵 R3 (DHCP for Right LAN)
+ip dhcp excluded-address 192.168.1.1
+
+ip dhcp pool LAN2
+network 192.168.1.0 255.255.255.0
+default-router 192.168.1.1
+dns-server 8.8.8.8
+exit
+
+
+
+
 
 
 
