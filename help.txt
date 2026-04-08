@@ -1,0 +1,104 @@
+| CIDR | Subnet Mask     | Usable IPs | Use Case        |
+| ---- | --------------- | ---------- | --------------- |
+| /24  | 255.255.255.0   | 254        | LAN (PCs)       |
+| /30  | 255.255.255.252 | 2          | Router ↔ Router |
+| /16  | 255.255.0.0     | 65k        | Huge networks   |
+
+
+
+Block size = 256 − last octet of subnet mask
+
+
+Find block size
+Jump in steps
+Fit IP in range
+
+
+
+Example =>  
+
+
+````````````````````````````````````````````````````````````
+
+Given:
+IP: 192.168.1.10
+Mask: 255.255.255.252
+👉 Step A: Find Block Size
+256 - 252 = 4
+
+👉 So blocks go like:
+
+0, 4, 8, 12, 16, ...
+👉 Step B: Find Range
+
+Your IP = 10
+
+Closest lower block = 8
+
+👉 So range:
+
+8 → 11
+👉 Step C: Final Answer
+Type	Value
+Network	192.168.1.8
+Usable	192.168.1.9
+Usable	192.168.1.10
+Broadcast	192.168.1.11
+
+
+
+``````````````````````````````````````````````````````````
+
+There are 3 private ranges:
+
+10.0.0.0 – 10.255.255.255
+172.16.0.0 – 172.31.255.255
+192.168.0.0 – 192.168.255.255
+
+
+10.10.10.1 is Private IP range
+
+
+
+
+==============>   Most imp => WIC 2T in 1841 router for adding the red wire
+
+
+| First Number | Class | Mask |
+| ------------ | ----- | ---- |
+| 1–126        | A     | /8   |
+| 128–191      | B     | /16  |
+| 192–223      | C     | /24  |
+
+
+
+NAT => ip nat inside source static 10.0.0.2 3.0.0.2
+
+
+| Command          | Meaning                  |
+| ---------------- | ------------------------ |
+| `ip nat inside`  | Private/internal network |
+| `ip nat outside` | Public/external network  |
+
+
+
+show ip nat translation
+
+
+
+NTP serve =>
+enable
+configure terminal
+ntp server 1.0.0.2
+
+
+
+
+
+
+
+
+
+
+
+
