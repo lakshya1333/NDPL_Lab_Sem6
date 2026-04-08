@@ -678,3 +678,140 @@ Once you share those outputs I can tell you exactly what the problem is. Right n
 
 Claude is AI and can make mistakes. Please double-check responses.
 
+
+#OSPF
+Write  me step by step what will i need to do2:40 pm
+Here is the complete step-by-step process:
+
+---
+
+## Step 1 — Open Router1 CLI in Packet Tracer
+
+Click on **Router1** → click the **CLI** tab → press **Enter** if you see a blank screen.
+
+---
+
+## Step 2 — Remove RIP from Router1
+
+```
+enable
+configure terminal
+no router rip
+```
+
+---
+
+## Step 3 — Add OSPF to Router1
+
+```
+router ospf 1
+ network 192.168.1.0 0.0.0.255 area 0
+ network 10.0.0.0 0.0.0.3 area 0
+end
+write memory
+```
+
+---
+
+## Step 4 — Open Router2 CLI
+
+Click on **Router2** → click the **CLI** tab → press **Enter**.
+
+---
+
+## Step 5 — Remove RIP from Router2
+
+```
+enable
+configure terminal
+no router rip
+```
+
+---
+
+## Step 6 — Add OSPF to Router2
+
+```
+router ospf 1
+ network 10.0.0.0 0.0.0.3 area 0
+ network 192.168.2.0 0.0.0.255 area 0
+ network 192.168.3.0 0.0.0.255 area 0
+end
+write memory
+```
+
+---
+
+## Step 7 — Open Router3 CLI
+
+Click on **Router3** → click the **CLI** tab → press **Enter**.
+
+---
+
+## Step 8 — Remove RIP from Router3
+
+```
+enable
+configure terminal
+no router rip
+```
+
+---
+
+## Step 9 — Add OSPF to Router3
+
+```
+router ospf 1
+ network 192.168.3.0 0.0.0.255 area 0
+ network 192.168.4.0 0.0.0.255 area 0
+end
+write memory
+```
+
+---
+
+## Step 10 — Wait 30 seconds
+
+OSPF takes a moment to form neighbour relationships between routers. Just wait and let it converge.
+
+---
+
+## Step 11 — Verify on each router
+
+Type this on Router1, Router2, and Router3 one by one:
+
+```
+show ip ospf neighbor
+```
+
+You should see output like this — the **State** column must say **FULL**:
+
+```
+Neighbor ID    Pri   State    Dead Time  Address       Interface
+192.168.3.2    1     FULL/DR  00:00:38   10.0.0.2      Serial0/0
+```
+
+Then run:
+
+```
+show ip route
+```
+
+You should now see **O** instead of **R** next to the routes, like this:
+
+```
+O    192.168.2.0/24 [110/2] via 10.0.0.2
+O    192.168.4.0/24 [110/3] via 10.0.0.2
+```
+
+---
+
+## Step 12 — Test with a ping
+
+Go to **PC0 → Desktop → Command Prompt** and type:
+
+```
+ping 192.168.4.11
+```
+
+If it replies, everything is working. If not, share the output of `show ip ospf neighbor` from each router and I will fix it.
