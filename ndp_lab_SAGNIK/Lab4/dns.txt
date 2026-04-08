@@ -1,0 +1,4 @@
+www.google.com 142.250.190.46
+www.github.com 140.82.121.4
+www.openai.com 13.107.246.40
+localhost 127.0.0.1

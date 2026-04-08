@@ -1,0 +1,87 @@
+PC0
+IP: 192.168.1.2
+Subnet: 255.255.255.0
+Gateway: 192.168.1.1
+
+PC1
+IP: 192.168.2.2
+Subnet: 255.255.255.0
+Gateway: 192.168.2.1
+
+
+
+bottom left router
+enable
+configure terminal
+
+interface fa0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+
+interface se0/1/0
+ip address 10.0.12.2 255.255.255.252
+no shutdown
+
+router ospf 1
+network 192.168.1.0 0.0.0.255 area 0
+network 10.0.12.0 0.0.0.3 area 0
+
+
+
+
+top left router
+enable
+configure terminal
+
+interface fa0/0
+ip address 10.0.0.1 255.255.255.252
+no shutdown
+
+interface se0/0
+ip address 10.0.12.1 255.255.255.252
+clock rate 64000
+no shutdown
+
+router ospf 1
+network 10.0.0.0 0.0.0.3 area 0
+network 10.0.12.0 0.0.0.3 area 0
+
+
+
+
+
+top right router
+enable
+configure terminal
+
+interface fa0/0
+ip address 10.0.0.2 255.255.255.252
+no shutdown
+
+interface se0/0
+ip address 10.0.23.1 255.255.255.252
+clock rate 64000
+no shutdown
+
+router ospf 1
+network 10.0.0.0 0.0.0.3 area 0
+network 10.0.23.0 0.0.0.3 area 0
+
+
+
+
+bottom right router
+enable
+configure terminal
+
+interface fa0/0
+ip address 192.168.2.1 255.255.255.0
+no shutdown
+
+interface se0/3/0
+ip address 10.0.23.2 255.255.255.252
+no shutdown
+
+router ospf 1
+network 192.168.2.0 0.0.0.255 area 0
+network 10.0.23.0 0.0.0.3 area 0

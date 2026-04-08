@@ -1,0 +1,4 @@
+101,Sagnik,123 Maple St,CSE,5,A,CS301,85
+102,Harish,456 Oak Ave,CCE,3,B,CC202,92
+103,Suryansh,789 Pine Rd,IT,7,D,IT405,78
+104,Madhav,012 Airforce,DSE,2,C,DS301,88

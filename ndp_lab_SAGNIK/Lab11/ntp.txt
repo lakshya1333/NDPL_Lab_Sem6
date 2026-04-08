@@ -1,0 +1,26 @@
+server
+IP Address: 192.168.1.2
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.1.1
+
+enable NTP in services
+
+
+router
+enable
+configure terminal
+
+interface fa0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+
+exit
+
+! IMPORTANT: do NOT configure ntp master
+ntp server 192.168.1.2
+
+
+CHECK-->ping 192.168.1.2
+
+WAIT for 30-60seconds then 
+show ntp status

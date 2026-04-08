@@ -1,0 +1,71 @@
+left router(dhcp server)
+enable
+configure terminal
+
+interface fa0/0
+ip address 192.168.10.1 255.255.255.0
+no shutdown
+
+interface se0/0
+ip address 10.0.12.1 255.255.255.252
+clock rate 64000
+no shutdown
+
+! DHCP CONFIG
+ip dhcp excluded-address 192.168.10.1 192.168.10.10
+
+ip dhcp pool LEFT_LAN
+network 192.168.10.0 255.255.255.0
+default-router 192.168.10.1
+dns-server 8.8.8.8
+
+! ROUTING
+ip route 192.168.1.0 255.255.255.0 10.0.12.2
+
+
+
+
+
+middle router
+enable
+configure terminal
+
+interface se0/0
+ip address 10.0.12.2 255.255.255.252
+no shutdown
+
+interface se0/1
+ip address 10.0.23.1 255.255.255.252
+clock rate 64000
+no shutdown
+
+! ROUTING
+ip route 192.168.10.0 255.255.255.0 10.0.12.1
+ip route 192.168.1.0 255.255.255.0 10.0.23.2
+
+
+
+
+
+right router(dhcp server)
+enable
+configure terminal
+
+interface fa0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+
+interface se0/0
+ip address 10.0.23.2 255.255.255.252
+no shutdown
+
+! DHCP CONFIG
+ip dhcp excluded-address 192.168.1.1 192.168.1.10
+
+ip dhcp pool RIGHT_LAN
+network 192.168.1.0 255.255.255.0
+default-router 192.168.1.1
+dns-server 8.8.8.8
+
+! ROUTING
+ip route 192.168.10.0 255.255.255.0 10.0.23.1

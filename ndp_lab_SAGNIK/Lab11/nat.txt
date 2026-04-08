@@ -1,0 +1,68 @@
+PC0
+IP: 1.0.0.2
+Subnet: 255.255.255.0
+Gateway: 1.0.0.1
+
+PC1
+IP: 1.0.0.3
+Subnet: 255.255.255.0
+Gateway: 1.0.0.1
+
+PC2
+IP: 10.0.0.2
+Subnet: 255.255.255.0
+Gateway: 10.0.0.1
+
+PC3
+IP: 10.0.0.3
+Subnet: 255.255.255.0
+Gateway: 10.0.0.1
+
+PC4
+IP: 10.0.0.4
+Subnet: 255.255.255.0
+Gateway: 10.0.0.1
+
+Server
+IP: 10.0.0.5
+Subnet: 255.255.255.0
+Gateway: 10.0.0.1
+
+
+
+left router(NAT router)
+enable
+configure terminal
+
+interface fa0/0
+ip address 1.0.0.1 255.255.255.0
+no shutdown
+ip nat inside
+
+interface se0/1/0
+ip address 2.0.0.1 255.255.255.0
+clock rate 64000
+no shutdown
+ip nat outside
+
+ip nat inside source static 1.0.0.2 2.0.0.10
+ip nat inside source static 1.0.0.3 2.0.0.11
+
+
+ip route 10.0.0.0 255.255.255.0 2.0.0.2
+
+
+
+right router
+enable
+configure terminal
+
+interface fa0/0
+ip address 10.0.0.1 255.255.255.0
+no shutdown
+
+interface se0/1/0
+ip address 2.0.0.2 255.255.255.0
+no shutdown
+
+ip route 1.0.0.0 255.255.255.0 2.0.0.1
