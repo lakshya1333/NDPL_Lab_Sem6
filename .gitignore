@@ -1,0 +1,23 @@
+# Ignore object files
+*.o
+*.obj
+
+# Ignore executables/binaries
+*.exe
+*.out
+*.bin
+
+# Ignore common compiled lab outputs (extensionless executables)
+client
+server
+q1
+q2
+q3
+q1_client
+q1_server
+q2_client
+q2_server
+q3_client
+q3_server
+aq_client
+aq_server
